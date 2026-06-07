@@ -192,11 +192,11 @@ def booking_view(request):
                 # EMAILS (SAFE - WON'T BREAK FLOW)
                 # -----------------------------
 
-                try:
-                    if booking.email:
-                        send_mail(
-                            "Booking Received",
-                            f"""
+                # Customer email
+                if booking.email:
+                    send_mail(
+                        subject="Booking Received",
+                        message=f"""
 Hi {booking.customer_name},
 
 Your booking is received.
@@ -207,17 +207,15 @@ Slot: {booking.slot}
 
 We will confirm soon.
 """,
-                            settings.EMAIL_HOST_USER,
-                            [booking.email],
-                            fail_silently=True
-                        )
-                except Exception as e:
-                    print("Customer email failed:", e)
+                        from_email=settings.EMAIL_HOST_USER,
+                        recipient_list=[booking.email],
+                        fail_silently=False
+                    )
 
-                try:
-                    send_mail(
-                        "New Booking",
-                        f"""
+                # Admin email
+                send_mail(
+                    subject="New Booking",
+                    message=f"""
 Customer: {booking.customer_name}
 Phone: {booking.phone}
 Email: {booking.email}
@@ -225,12 +223,10 @@ Service: {booking.service.name}
 Date: {booking.appointment_date}
 Slot: {booking.slot}
 """,
-                        settings.EMAIL_HOST_USER,
-                        ["bbcare1402@gmail.com"],
-                        fail_silently=True
-                    )
-                except Exception as e:
-                    print("Admin email failed:", e)
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=["bbcare1402@gmail.com"],
+                    fail_silently=False
+                )
 
                 return redirect("booking_success")
 
@@ -242,8 +238,6 @@ Slot: {booking.slot}
             print("FORM ERRORS:", form.errors)
 
     return render(request, "core/booking.html", {"form": form})
-
-
 # ----------------------------
 # Success View
 # ----------------------------
