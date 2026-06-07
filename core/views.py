@@ -165,9 +165,7 @@ def generate_slots(start_slot, duration):
 # ----------------------------
 # Booking View
 # ----------------------------
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.db import transaction
+
 
 def booking_view(request):
 
