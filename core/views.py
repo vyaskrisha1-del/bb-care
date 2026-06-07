@@ -11,9 +11,20 @@ from .forms import BookingForm
 from .models import Booking
 from django.core.mail import send_mail
 from django.conf import settings
-from utilis.emails import safe_send_mail
 
 
+def safe_send_mail(subject, message, recipient_list):
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=recipient_list,
+            fail_silently=False
+        )
+        print(f"EMAIL SENT → {recipient_list}")
+    except Exception as e:
+        print("EMAIL FAILED:", e)
 
 def get_available_slots(request):
 
