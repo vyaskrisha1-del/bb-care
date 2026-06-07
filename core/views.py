@@ -11,6 +11,7 @@ from .forms import BookingForm
 from .models import Booking
 from django.core.mail import send_mail
 from django.conf import settings
+from .utilis.emails import send_resend_email
 
 
 def safe_send_mail(subject, message, recipient_list):
