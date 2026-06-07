@@ -9,6 +9,22 @@ from django.http import JsonResponse
 
 from .forms import BookingForm
 from .models import Booking
+from django.core.mail import send_mail
+from django.conf import settings
+
+
+def safe_send_mail(subject, message, recipient_list):
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=recipient_list,
+            fail_silently=False
+        )
+        print(f"EMAIL SENT → {recipient_list}")
+    except Exception as e:
+        print("EMAIL FAILED:", e)
 
 def get_available_slots(request):
 
@@ -149,6 +165,10 @@ def generate_slots(start_slot, duration):
 # ----------------------------
 # Booking View
 # ----------------------------
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.db import transaction
+
 def booking_view(request):
 
     form = BookingForm(request.POST or None)
@@ -189,13 +209,13 @@ def booking_view(request):
                     print("BOOKING SAVED:", booking.id)
 
                 # -----------------------------
-                # EMAILS (SAFE - WON'T BREAK FLOW)
+                # SAFE EMAIL SYSTEM
                 # -----------------------------
 
                 # Customer email
                 if booking.email:
-                    send_mail(
-                        subject="Booking Received",
+                    safe_send_mail(
+                        subject="Booking Received ✨ BB CARE",
                         message=f"""
 Hi {booking.customer_name},
 
@@ -207,14 +227,12 @@ Slot: {booking.slot}
 
 We will confirm soon.
 """,
-                        from_email=settings.EMAIL_HOST_USER,
-                        recipient_list=[booking.email],
-                        fail_silently=False
+                        recipient_list=[booking.email]
                     )
 
                 # Admin email
-                send_mail(
-                    subject="New Booking",
+                safe_send_mail(
+                    subject="New Booking Alert - BB CARE",
                     message=f"""
 Customer: {booking.customer_name}
 Phone: {booking.phone}
@@ -223,16 +241,15 @@ Service: {booking.service.name}
 Date: {booking.appointment_date}
 Slot: {booking.slot}
 """,
-                    from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=["bbcare1402@gmail.com"],
-                    fail_silently=False
+                    recipient_list=["bbcare1402@gmail.com"]
                 )
 
+                # SUCCESS REDIRECT
                 return redirect("booking_success")
 
             except Exception as e:
                 print("BOOKING ERROR:", e)
-                messages.error(request, f"Error: {e}")
+                messages.error(request, "Something went wrong. Please try again.")
 
         else:
             print("FORM ERRORS:", form.errors)
