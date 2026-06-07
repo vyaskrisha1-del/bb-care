@@ -15,16 +15,20 @@ from django.conf import settings
 
 def safe_send_mail(subject, message, recipient_list):
     try:
-        send_mail(
+        result = send_mail(
             subject=subject,
             message=message,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=recipient_list,
-            fail_silently=False
+            fail_silently=False,
         )
-        print(f"EMAIL SENT → {recipient_list}")
+
+        print("SEND_MAIL RESULT:", result)
+        print("FROM:", settings.EMAIL_HOST_USER)
+        print("TO:", recipient_list)
+
     except Exception as e:
-        print("EMAIL FAILED:", e)
+        print("EMAIL FAILED:", repr(e))
 
 def get_available_slots(request):
 
